@@ -7,32 +7,44 @@
 
 using namespace DataProc;
 
-static StorageService storageService(CONFIG_SYSTEM_SAVE_FILE_PATH);
+#define MAP_LEVEL_MIN    0
+#define MAP_LEVEL_MAX    19
 
-static void MapConvGetRange(const char* dirName, int16_t* min, int16_t* max)
+static StorageService storageService(CONFIG_SYSTEM_SAVE_FILE_PATH, 4096);
+
+static bool MapConvGetRange(const char* dirName, int16_t* min, int16_t* max)
 {
+    bool retval = false;
     lv_fs_dir_t dir;
-    lv_fs_res_t res = lv_fs_dir_open(&dir, dirName);
 
-    if (res == LV_FS_RES_OK)
+    if (lv_fs_dir_open(&dir, dirName) == LV_FS_RES_OK)
     {
         LV_LOG_USER("%s open success", dirName);
 
-        int16_t levelMin = 19;
-        int16_t levelMax = 0;
+        int16_t levelMin = MAP_LEVEL_MAX;
+        int16_t levelMax = MAP_LEVEL_MIN;
 
         char name[128];
         while (1)
         {
-            lv_fs_dir_read(&dir, name);
-            if (name[0] == '\0')
+            lv_fs_res_t res = lv_fs_dir_read(&dir, name);
+
+            if (name[0] == '\0' || res != LV_FS_RES_OK)
             {
                 break;
             }
 
             if (name[0] == '/')
             {
+                retval = true;
                 int level = atoi(name + 1);
+
+                if (level < MAP_LEVEL_MIN || level > MAP_LEVEL_MAX)
+                {
+                    LV_LOG_ERROR("Error level = %d", level);
+                    retval = false;
+                    break;
+                }
 
                 if (level < levelMin)
                 {
@@ -46,15 +58,19 @@ static void MapConvGetRange(const char* dirName, int16_t* min, int16_t* max)
             }
         }
 
-        *min = levelMin;
-        *max = levelMax;
+        if (retval)
+        {
+            *min = levelMin;
+            *max = levelMax;
+        }
 
         lv_fs_dir_close(&dir);
     }
     else
     {
-        LV_LOG_USER("%s open faild", dirName);
+        LV_LOG_ERROR("%s open faild", dirName);
     }
+    return retval;
 }
 
 static void onLoad(Account* account)
@@ -68,11 +84,15 @@ static void onLoad(Account* account)
     MapConv::SetExtName(sysConfig.mapExtName);
     MapConv::SetCoordTransformEnable(!sysConfig.mapWGS84);
 
-    int16_t levelMin = 19;
-    int16_t levelMax = 0;
-    MapConvGetRange(sysConfig.mapDirPath, &levelMin, &levelMax);
-
-    MapConv::SetLevelRange(levelMin, levelMax);
+    int16_t levelMin, levelMax;
+    if (MapConvGetRange(sysConfig.mapDirPath, &levelMin, &levelMax))
+    {
+        MapConv::SetLevelRange(levelMin, levelMax);
+    }
+    else
+    {
+        LV_LOG_ERROR("Get map level range failed!");
+    }
 
     LV_LOG_USER(
         "Map path: %s, WGS84: %d, level min = %d, max = %d",
@@ -126,6 +146,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
         info->isDetect = HAL::SD_GetReady();
         info->totalSizeMB = HAL::SD_GetCardSizeMB();
         info->freeSizeMB = 0.0f;
+        info->type = HAL::SD_GetTypeName();
         return 0;
     }
 

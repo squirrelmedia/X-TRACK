@@ -46,7 +46,7 @@ const lv_obj_class_t lv_spinbox_class = {
 
 lv_obj_t * lv_spinbox_create(lv_obj_t * parent)
 {
-    LV_LOG_INFO("begin")
+    LV_LOG_INFO("begin");
     lv_obj_t * obj = lv_obj_class_create_obj(MY_CLASS, parent);
     lv_obj_class_init_obj(obj);
     return obj;
@@ -158,8 +158,8 @@ void lv_spinbox_set_pos(lv_obj_t * obj, uint8_t pos)
     step_limit       = LV_MAX(spinbox->range_max, (spinbox->range_min < 0 ? (-spinbox->range_min) : spinbox->range_min));
     int32_t new_step = spinbox->step * lv_pow(10, pos);
     if(pos <= 0) spinbox->step = 1;
-    else if(new_step <= step_limit) spinbox->step = new_step; 
-	
+    else if(new_step <= step_limit) spinbox->step = new_step;
+
     lv_spinbox_updatevalue(obj);
 }
 /*=====================
@@ -426,7 +426,7 @@ static void lv_spinbox_updatevalue(lv_obj_t * obj)
     int32_t i;
     char digits[LV_SPINBOX_MAX_DIGIT_COUNT + 4];
     /*Convert the numbers to string (the sign is already handled so always covert positive number)*/
-    lv_snprintf(digits, sizeof(digits), "%d", LV_ABS(spinbox->value));
+    lv_snprintf(digits, sizeof(digits), "%" LV_PRId32, LV_ABS(spinbox->value));
 
     /*Add leading zeros*/
     int lz_cnt = spinbox->digit_count - (int)strlen(digits);

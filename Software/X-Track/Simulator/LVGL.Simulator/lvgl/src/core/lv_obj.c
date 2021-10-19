@@ -35,6 +35,10 @@
     #include "../gpu/lv_gpu_nxp_pxp_osa.h"
 #endif
 
+#if LV_USE_GPU_SDL
+    #include "../gpu/lv_gpu_sdl.h"
+#endif
+
 /*********************
  *      DEFINES
  *********************/
@@ -121,6 +125,9 @@ void lv_init(void)
         for(; ;) ;
     }
 #endif
+#if LV_USE_GPU_SDL
+    lv_gpu_sdl_init();
+#endif
 
     _lv_obj_style_init();
     _lv_ll_init(&LV_GC_ROOT(_lv_disp_ll), sizeof(lv_disp_t));
@@ -138,33 +145,36 @@ void lv_init(void)
 
     uint8_t * txt_u8 = (uint8_t *)txt;
     if(txt_u8[0] != 0xc3 || txt_u8[1] != 0x81 || txt_u8[2] != 0x00) {
-        LV_LOG_WARN("The strings has no UTF-8 encoding. Non-ASCII characters won't be displayed.")
+        LV_LOG_WARN("The strings has no UTF-8 encoding. Non-ASCII characters won't be displayed.");
     }
 
     uint32_t endianess_test = 0x11223344;
-    uint8_t * endianess_test_p = (uint8_t*) &endianess_test;
+    uint8_t * endianess_test_p = (uint8_t *) &endianess_test;
     bool big_endian = endianess_test_p[0] == 0x11 ? true : false;
 
     if(big_endian) {
-        LV_ASSERT_MSG(LV_BIG_ENDIAN_SYSTEM == 1, "It's a big endian system but LV_BIG_ENDIAN_SYSTEM is not enabled in lv_conf.h");
-    } else {
-        LV_ASSERT_MSG(LV_BIG_ENDIAN_SYSTEM == 0, "It's a little endian system but LV_BIG_ENDIAN_SYSTEM is enabled in lv_conf.h");
+        LV_ASSERT_MSG(LV_BIG_ENDIAN_SYSTEM == 1,
+                      "It's a big endian system but LV_BIG_ENDIAN_SYSTEM is not enabled in lv_conf.h");
+    }
+    else {
+        LV_ASSERT_MSG(LV_BIG_ENDIAN_SYSTEM == 0,
+                      "It's a little endian system but LV_BIG_ENDIAN_SYSTEM is enabled in lv_conf.h");
     }
 
 #if LV_USE_ASSERT_MEM_INTEGRITY
-    LV_LOG_WARN("Memory integrity checks are enabled via LV_USE_ASSERT_MEM_INTEGRITY which makes LVGL much slower")
+    LV_LOG_WARN("Memory integrity checks are enabled via LV_USE_ASSERT_MEM_INTEGRITY which makes LVGL much slower");
 #endif
 
 #if LV_USE_ASSERT_OBJ
-    LV_LOG_WARN("Object sanity checks are enabled via LV_USE_ASSERT_OBJ which makes LVGL much slower")
+    LV_LOG_WARN("Object sanity checks are enabled via LV_USE_ASSERT_OBJ which makes LVGL much slower");
 #endif
 
 #if LV_USE_ASSERT_STYLE
-    LV_LOG_WARN("Style sanity checks are enabled that uses more RAM")
+    LV_LOG_WARN("Style sanity checks are enabled that uses more RAM");
 #endif
 
 #if LV_LOG_LEVEL == LV_LOG_LEVEL_TRACE
-    LV_LOG_WARN("Log level is set the Trace which makes LVGL much slower")
+    LV_LOG_WARN("Log level is set the Trace which makes LVGL much slower");
 #endif
 
     lv_extra_init();
@@ -174,10 +184,13 @@ void lv_init(void)
     LV_LOG_TRACE("finished");
 }
 
-#if LV_ENABLE_GC || !LV_MEM_CUSTOM
+#if LV_ENABLE_GC || !LV_MEM_CUSTOM || LV_USE_GPU_SDL
 
 void lv_deinit(void)
 {
+#if LV_USE_GPU_SDL
+    lv_gpu_sdl_deinit();
+#endif
     _lv_gc_clear_roots();
 
     lv_disp_set_default(NULL);
@@ -194,7 +207,7 @@ void lv_deinit(void)
 
 lv_obj_t * lv_obj_create(lv_obj_t * parent)
 {
-    LV_LOG_INFO("begin")
+    LV_LOG_INFO("begin");
     lv_obj_t * obj = lv_obj_class_create_obj(MY_CLASS, parent);
     lv_obj_class_init_obj(obj);
     return obj;
@@ -460,7 +473,7 @@ static void lv_obj_draw(lv_event_t * e)
 
         if(_lv_area_is_in(info->area, &coords, r) == false) {
             info->res = LV_COVER_RES_NOT_COVER;
-           return;
+            return;
         }
 
         if(lv_obj_get_style_bg_opa(obj, LV_PART_MAIN) < LV_OPA_MAX) {
@@ -628,7 +641,8 @@ static lv_res_t scrollbar_init_draw_dsc(lv_obj_t * obj, lv_draw_rect_dsc_t * dsc
         dsc->border_width = lv_obj_get_style_border_width(obj, LV_PART_SCROLLBAR);
         if(dsc->border_width > 0) {
             dsc->border_color = lv_obj_get_style_border_color(obj, LV_PART_SCROLLBAR);
-        } else {
+        }
+        else {
             dsc->border_opa = LV_OPA_TRANSP;
         }
     }
@@ -640,7 +654,8 @@ static lv_res_t scrollbar_init_draw_dsc(lv_obj_t * obj, lv_draw_rect_dsc_t * dsc
         if(dsc->shadow_width > 0) {
             dsc->shadow_spread = lv_obj_get_style_shadow_spread(obj, LV_PART_SCROLLBAR);
             dsc->shadow_color = lv_obj_get_style_shadow_color(obj, LV_PART_SCROLLBAR);
-        } else {
+        }
+        else {
             dsc->shadow_opa = LV_OPA_TRANSP;
         }
     }
@@ -652,10 +667,11 @@ static lv_res_t scrollbar_init_draw_dsc(lv_obj_t * obj, lv_draw_rect_dsc_t * dsc
         dsc->shadow_opa = (dsc->bg_opa * opa) >> 8;
     }
 
-    if(dsc->bg_opa != LV_OPA_TRANSP || dsc->border_opa != LV_OPA_TRANSP || dsc->shadow_opa != LV_OPA_TRANSP ) {
+    if(dsc->bg_opa != LV_OPA_TRANSP || dsc->border_opa != LV_OPA_TRANSP || dsc->shadow_opa != LV_OPA_TRANSP) {
         dsc->radius = lv_obj_get_style_radius(obj, LV_PART_SCROLLBAR);
         return LV_RES_OK;
-    } else {
+    }
+    else {
         return LV_RES_INV;
     }
 #else
@@ -873,7 +889,7 @@ static void lv_obj_set_state(lv_obj_t * obj, lv_state_t new_state)
         }
     }
 
-    for(i = 0;i < tsi; i++) {
+    for(i = 0; i < tsi; i++) {
         lv_part_t part_act = lv_obj_style_get_selector_part(ts[i].selector);
         _lv_obj_style_create_transition(obj, part_act, prev_state, new_state, &ts[i]);
     }
