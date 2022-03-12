@@ -9,11 +9,13 @@
 #include "lv_msgbox.h"
 #if LV_USE_MSGBOX
 
+#include "../../../misc/lv_assert.h"
 
 /*********************
  *      DEFINES
  *********************/
 #define LV_MSGBOX_FLAG_AUTO_PARENT  LV_OBJ_FLAG_WIDGET_1        /*Mark that the parent was automatically created*/
+#define MY_CLASS    &lv_msgbox_class
 
 /**********************
  *      TYPEDEFS
@@ -28,24 +30,24 @@ static void msgbox_close_click_event_cb(lv_event_t * e);
  *  STATIC VARIABLES
  **********************/
 const lv_obj_class_t lv_msgbox_class = {
-        .base_class = &lv_obj_class,
-        .width_def = LV_DPI_DEF * 2,
-        .height_def = LV_SIZE_CONTENT,
-        .instance_size = sizeof(lv_msgbox_t)
+    .base_class = &lv_obj_class,
+    .width_def = LV_DPI_DEF * 2,
+    .height_def = LV_SIZE_CONTENT,
+    .instance_size = sizeof(lv_msgbox_t)
 };
 
 const lv_obj_class_t lv_msgbox_content_class = {
-        .base_class = &lv_obj_class,
-        .width_def = LV_PCT(100),
-        .height_def = LV_SIZE_CONTENT,
-        .instance_size = sizeof(lv_obj_t)
+    .base_class = &lv_obj_class,
+    .width_def = LV_PCT(100),
+    .height_def = LV_SIZE_CONTENT,
+    .instance_size = sizeof(lv_obj_t)
 };
 
 const lv_obj_class_t lv_msgbox_backdrop_class = {
-        .base_class = &lv_obj_class,
-        .width_def = LV_PCT(100),
-        .height_def = LV_PCT(100),
-        .instance_size = sizeof(lv_obj_t)
+    .base_class = &lv_obj_class,
+    .width_def = LV_PCT(100),
+    .height_def = LV_PCT(100),
+    .instance_size = sizeof(lv_obj_t)
 };
 
 /**********************
@@ -83,7 +85,7 @@ lv_obj_t * lv_msgbox_create(lv_obj_t * parent, const char * title, const char * 
     bool has_title = title && strlen(title) > 0;
 
     /*When a close button is required, we need the empty label as spacer to push the button to the right*/
-    if (add_close_btn || has_title) {
+    if(add_close_btn || has_title) {
         mbox->title = lv_label_create(obj);
         lv_label_set_text(mbox->title, has_title ? title : "");
         lv_label_set_long_mode(mbox->title, LV_LABEL_LONG_SCROLL_CIRCULAR);
@@ -106,7 +108,7 @@ lv_obj_t * lv_msgbox_create(lv_obj_t * parent, const char * title, const char * 
     mbox->content = lv_obj_class_create_obj(&lv_msgbox_content_class, obj);
 
     bool has_txt = txt && strlen(txt) > 0;
-    if (has_txt) {
+    if(has_txt) {
         mbox->text = lv_label_create(mbox->content);
         lv_label_set_text(mbox->text, txt);
         lv_label_set_long_mode(mbox->text, LV_LABEL_LONG_WRAP);
@@ -126,6 +128,7 @@ lv_obj_t * lv_msgbox_create(lv_obj_t * parent, const char * title, const char * 
         const lv_font_t * font = lv_obj_get_style_text_font(mbox->btns, LV_PART_ITEMS);
         lv_coord_t btn_h = lv_font_get_line_height(font) + LV_DPI_DEF / 10;
         lv_obj_set_size(mbox->btns, btn_cnt * (2 * LV_DPI_DEF / 3), btn_h);
+        lv_obj_set_style_max_width(mbox->btns, lv_pct(100), 0);
         lv_obj_add_flag(mbox->btns, LV_OBJ_FLAG_EVENT_BUBBLE);    /*To see the event directly on the message box*/
     }
 
@@ -135,30 +138,35 @@ lv_obj_t * lv_msgbox_create(lv_obj_t * parent, const char * title, const char * 
 
 lv_obj_t * lv_msgbox_get_title(lv_obj_t * obj)
 {
+    LV_ASSERT_OBJ(obj, MY_CLASS);
     lv_msgbox_t * mbox = (lv_msgbox_t *)obj;
     return mbox->title;
 }
 
 lv_obj_t * lv_msgbox_get_close_btn(lv_obj_t * obj)
 {
+    LV_ASSERT_OBJ(obj, MY_CLASS);
     lv_msgbox_t * mbox = (lv_msgbox_t *)obj;
     return mbox->close_btn;
 }
 
 lv_obj_t * lv_msgbox_get_text(lv_obj_t * obj)
 {
+    LV_ASSERT_OBJ(obj, MY_CLASS);
     lv_msgbox_t * mbox = (lv_msgbox_t *)obj;
     return mbox->text;
 }
 
 lv_obj_t * lv_msgbox_get_content(lv_obj_t * obj)
 {
+    LV_ASSERT_OBJ(obj, MY_CLASS);
     lv_msgbox_t * mbox = (lv_msgbox_t *)obj;
     return mbox->content;
 }
 
 lv_obj_t * lv_msgbox_get_btns(lv_obj_t * obj)
 {
+    LV_ASSERT_OBJ(obj, MY_CLASS);
     lv_msgbox_t * mbox = (lv_msgbox_t *)obj;
     return mbox->btns;
 }

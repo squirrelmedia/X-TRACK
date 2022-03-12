@@ -45,6 +45,7 @@ void SystemInfos::onViewWillAppear()
     lv_timer_ready(timer);
 
     View.SetScrollToY(root, -LV_VER_RES, LV_ANIM_OFF);
+    lv_obj_set_style_opa(root, LV_OPA_TRANSP, 0);
     lv_obj_fade_in(root, 300, 0);
 }
 
@@ -71,7 +72,6 @@ void SystemInfos::onViewDidUnload()
 
 void SystemInfos::AttachEvent(lv_obj_t* obj)
 {
-    lv_obj_set_user_data(obj, this);
     lv_obj_add_event_cb(obj, onEvent, LV_EVENT_ALL, this);
 }
 
@@ -149,9 +149,11 @@ void SystemInfos::onTimerUpdate(lv_timer_t* timer)
 
 void SystemInfos::onEvent(lv_event_t* event)
 {
+    SystemInfos* instance = (SystemInfos*)lv_event_get_user_data(event);
+    LV_ASSERT_NULL(instance);
+
     lv_obj_t* obj = lv_event_get_target(event);
     lv_event_code_t code = lv_event_get_code(event);
-    SystemInfos* instance = (SystemInfos*)lv_obj_get_user_data(obj);
 
     if (code == LV_EVENT_PRESSED)
     {

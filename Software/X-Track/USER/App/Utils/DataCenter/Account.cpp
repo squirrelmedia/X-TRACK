@@ -217,19 +217,19 @@ bool Account::Commit(const void* data_p, uint32_t size)
   */
 int Account::Publish()
 {
-    int retval = ERROR_UNKNOW;
+    int retval = RES_UNKNOW;
 
     if (priv.BufferSize == 0)
     {
         DC_LOG_ERROR("pub[%s] has not cache", ID);
-        return ERROR_NO_CACHE;
+        return RES_NO_CACHE;
     }
 
     void* rBuf;
     if (!PingPongBuffer_GetReadBuf(&priv.BufferManager, &rBuf))
     {
         DC_LOG_WARN("pub[%s] data was not commit", ID);
-        return ERROR_NO_COMMITED;
+        return RES_NO_COMMITED;
     }
 
     EventParam_t param;
@@ -280,18 +280,18 @@ int Account::Pull(const char* pubID, void* data_p, uint32_t size)
     if (pub == nullptr)
     {
         DC_LOG_ERROR("sub[%s] was not subscribe pub[%s]", ID, pubID);
-        return ERROR_NOT_FOUND;
+        return RES_NOT_FOUND;
     }
     return Pull(pub, data_p, size);
 }
 
 int Account::Pull(Account* pub, void* data_p, uint32_t size)
 {
-    int retval = ERROR_UNKNOW;
+    int retval = RES_UNKNOW;
 
     if (pub == nullptr)
     {
-        return ERROR_NOT_FOUND;
+        return RES_NOT_FOUND;
     }
 
     DC_LOG_INFO("sub[%s] pull << data(0x%p)[%d] << pub[%s] ...",
@@ -359,7 +359,7 @@ int Account::Notify(const char* pubID, const void* data_p, uint32_t size)
     if (pub == nullptr)
     {
         DC_LOG_ERROR("sub[%s] was not subscribe pub[%s]", ID, pubID);
-        return ERROR_NOT_FOUND;
+        return RES_NOT_FOUND;
     }
     return Notify(pub, data_p, size);
 }
@@ -373,11 +373,11 @@ int Account::Notify(const char* pubID, const void* data_p, uint32_t size)
   */
 int Account::Notify(Account* pub, const void* data_p, uint32_t size)
 {
-    int retval = ERROR_UNKNOW;
+    int retval = RES_UNKNOW;
 
     if (pub == nullptr)
     {
-        return ERROR_NOT_FOUND;
+        return RES_NOT_FOUND;
     }
 
     DC_LOG_INFO("sub[%s] notify >> data(0x%p)[%d] >> pub[%s] ...",
@@ -401,7 +401,7 @@ int Account::Notify(Account* pub, const void* data_p, uint32_t size)
     else
     {
         DC_LOG_WARN("pub[%s] not register callback", pub->ID);
-        retval = ERROR_NO_CALLBACK;
+        retval = RES_NO_CALLBACK;
     }
 
     return retval;
@@ -485,7 +485,7 @@ void Account::SetTimerEnable(bool en)
   * @brief  Get the number of publishers
   * @retval number of publishers
   */
-uint32_t Account::GetPublishersSize()
+size_t Account::GetPublishersSize()
 {
     return publishers.size();
 }
@@ -494,7 +494,7 @@ uint32_t Account::GetPublishersSize()
   * @brief  Get the number of subscribes
   * @retval number of subscribes
   */
-uint32_t Account::GetSubscribersSize()
+size_t Account::GetSubscribersSize()
 {
     return subscribers.size();
 }

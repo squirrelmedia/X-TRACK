@@ -58,12 +58,12 @@
 *.lnp
 *.orc
 # define exception below if needed
-*.pack
+#*.pack
 # define exception below if needed
 *.pdsc
 *.plg
 # define exception below if needed
-*.sct
+#*.sct
 *.sfd
 *.sfr
 

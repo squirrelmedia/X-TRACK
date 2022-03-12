@@ -1,32 +1,35 @@
 #include "HAL.h"
 
+#define BATT_ADC                    ADC1
 #define BATT_MIN_VOLTAGE            3300
 #define BATT_MAX_VOLTAGE            4200
 #define BATT_FULL_CHARGE_VOLTAGE    4100
 
-#define POWER_ADC                   ADC1
+#define BATT_CHG_DET_PULLUP         1
+#if BATT_CHG_DET_PULLUP
+#  define BATT_CHG_DET_PIN_MODE     INPUT_PULLUP
+#  define BATT_CHG_DET_STATUS       (!digitalRead(CONFIG_BAT_CHG_DET_PIN))
+#else
+#  define BATT_CHG_DET_PIN_MODE     INPUT_PULLDOWN
+#  define BATT_CHG_DET_STATUS       ((usage == 100) ? false : digitalRead(CONFIG_BAT_CHG_DET_PIN))
+#endif
 
-typedef struct
+struct
 {
     uint32_t LastHandleTime;
     uint16_t AutoLowPowerTimeout;
     bool AutoLowPowerEnable;
-    bool IsShutdown;
-    volatile uint16_t ADCValue;
+    bool ShutdownReq;
+    uint16_t ADCValue;
     HAL::Power_CallbackFunction_t EventCallback;
-} Power_t;
+} Power;
 
-static Power_t Power =
-{
-    .AutoLowPowerTimeout = 60,
-};
-
-static void Power_ADC_Init()
+static void Power_ADC_Init(ADC_Type* ADCx)
 {
     RCC_APB2PeriphClockCmd(RCC_APB2PERIPH_ADC1, ENABLE);
     RCC_ADCCLKConfig(RCC_APB2CLK_Div8);
 
-    ADC_Reset(POWER_ADC);
+    ADC_Reset(ADCx);
 
     ADC_InitType ADC_InitStructure;
     ADC_StructInit(&ADC_InitStructure);
@@ -36,23 +39,23 @@ static void Power_ADC_Init()
     ADC_InitStructure.ADC_ExternalTrig = ADC_ExternalTrig_None;
     ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
     ADC_InitStructure.ADC_NumOfChannel = 1;
-    ADC_Init(POWER_ADC, &ADC_InitStructure);
+    ADC_Init(ADCx, &ADC_InitStructure);
 
-    ADC_ClearFlag(POWER_ADC, ADC_FLAG_EC);
+    ADC_ClearFlag(ADCx, ADC_FLAG_EC);
 
-    ADC_Ctrl(POWER_ADC, ENABLE);
-    ADC_RstCalibration(POWER_ADC);
-    while(ADC_GetResetCalibrationStatus(POWER_ADC));
-    ADC_StartCalibration(POWER_ADC);
-    while(ADC_GetCalibrationStatus(POWER_ADC));
+    ADC_Ctrl(ADCx, ENABLE);
+    ADC_RstCalibration(ADCx);
+    while(ADC_GetResetCalibrationStatus(ADCx));
+    ADC_StartCalibration(ADCx);
+    while(ADC_GetCalibrationStatus(ADCx));
 }
 
 static uint16_t Power_ADC_GetValue()
 {
     uint16_t retval = 0;
-    if(ADC_GetFlagStatus(POWER_ADC, ADC_FLAG_EC))
+    if(ADC_GetFlagStatus(BATT_ADC, ADC_FLAG_EC))
     {
-        retval = ADC_GetConversionValue(POWER_ADC);
+        retval = ADC_GetConversionValue(BATT_ADC);
     }
     return retval;
 }
@@ -64,12 +67,12 @@ static void Power_ADC_Update()
     if(!isStartConv)
     {
         ADC_RegularChannelConfig(
-            POWER_ADC,
+            BATT_ADC,
             PIN_MAP[CONFIG_BAT_DET_PIN].ADC_Channel,
             1,
             ADC_SampleTime_41_5
         );
-        ADC_SoftwareStartConvCtrl(POWER_ADC, ENABLE);
+        ADC_SoftwareStartConvCtrl(BATT_ADC, ENABLE);
         isStartConv = true;
     }
     else
@@ -81,6 +84,9 @@ static void Power_ADC_Update()
 
 void HAL::Power_Init()
 {
+    memset(&Power, 0, sizeof(Power));
+    Power.AutoLowPowerTimeout = 60;
+
     Serial.printf("Power: Waiting[%dms]...\r\n", CONFIG_POWER_WAIT_TIME);
     pinMode(CONFIG_POWER_EN_PIN, OUTPUT);
     digitalWrite(CONFIG_POWER_EN_PIN, LOW);
@@ -88,9 +94,9 @@ void HAL::Power_Init()
     digitalWrite(CONFIG_POWER_EN_PIN, HIGH);
     Serial.println("Power: ON");
 
-    Power_ADC_Init();
+    Power_ADC_Init(BATT_ADC);
     pinMode(CONFIG_BAT_DET_PIN, INPUT_ANALOG);
-    pinMode(CONFIG_BAT_CHG_DET_PIN, INPUT_PULLUP);
+    pinMode(CONFIG_BAT_CHG_DET_PIN, BATT_CHG_DET_PIN_MODE);
 
 //    Power_SetAutoLowPowerTimeout(5 * 60);
 //    Power_HandleTimeUpdate();
@@ -120,8 +126,7 @@ void HAL::Power_SetAutoLowPowerEnable(bool en)
 
 void HAL::Power_Shutdown()
 {
-    Backlight_SetGradual(0, 500);
-    Power.IsShutdown = true;
+    __ExecuteOnce(Power.ShutdownReq = true);
 }
 
 void HAL::Power_Update()
@@ -142,13 +147,16 @@ void HAL::Power_Update()
 
 void HAL::Power_EventMonitor()
 {
-    if(Power.IsShutdown)
+    if(Power.ShutdownReq)
     {
         if(Power.EventCallback)
         {
             Power.EventCallback();
         }
+        Backlight_SetGradual(0, 500);
         digitalWrite(CONFIG_POWER_EN_PIN, LOW);
+        Serial.println("Power: OFF");
+        Power.ShutdownReq = false;
     }
 }
 
@@ -173,7 +181,7 @@ void HAL::Power_GetInfo(Power_Info_t* info)
     __LimitValue(usage, 0, 100);
 
     info->usage = usage;
-    info->isCharging = !digitalRead(CONFIG_BAT_CHG_DET_PIN);
+    info->isCharging = BATT_CHG_DET_STATUS;
     info->voltage = voltage;
 }
 

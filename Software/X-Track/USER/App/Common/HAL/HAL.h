@@ -44,7 +44,7 @@ void Backlight_ForceLit(bool en);
 void Display_Init();
 void Display_DumpCrashInfo(const char* info);
 void Display_SetAddrWindow(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
-void Display_SendPixels(uint16_t* pixels, uint32_t len);
+void Display_SendPixels(const uint16_t* pixels, uint32_t len);
     
 typedef void(*Display_CallbackFunc_t)(void);
 void Display_SetSendFinishCallback(Display_CallbackFunc_t func);
@@ -53,15 +53,15 @@ void Display_SetSendFinishCallback(Display_CallbackFunc_t func);
 void FaultHandle_Init();
 
 /* I2C */
-void I2C_Scan(bool startScan);
+int I2C_Scan();
 
 /* IMU */
-void IMU_Init();
+bool IMU_Init();
 void IMU_SetCommitCallback(CommitFunc_t func, void* userData);
 void IMU_Update();
     
 /* MAG */
-void MAG_Init();
+bool MAG_Init();
 void MAG_SetCommitCallback(CommitFunc_t func, void* userData);
 void MAG_Update();
 

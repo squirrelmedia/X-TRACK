@@ -13,6 +13,8 @@
 #include "resource.h"
 #include "App.h"
 #include "Common/HAL/HAL.h"
+#include "Utils/lv_lib_png/lv_png.h"
+#include "Utils/lv_img_png/lv_img_png.h"
 
 #if _MSC_VER >= 1200
  // Disable compilation warnings.

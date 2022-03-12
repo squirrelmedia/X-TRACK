@@ -32,7 +32,7 @@ void LiveMapModel::GetGPS_Info(HAL::GPS_Info_t* info)
 {
     account->Pull("GPS", info, sizeof(HAL::GPS_Info_t));
 
-    /* Default location : Tian An Men */
+    /* Use default location */
     if (!info->isVaild)
     {
         DataProc::SysConfig_Info_t sysConfig;
@@ -47,13 +47,14 @@ void LiveMapModel::GetArrowTheme(char* buf, uint32_t size)
     DataProc::SysConfig_Info_t sysConfig;
     account->Pull("SysConfig", &sysConfig, sizeof(sysConfig));
     strncpy(buf, sysConfig.arrowTheme, size);
+    buf[size - 1] = '\0';
 }
 
 int LiveMapModel::onEvent(Account* account, Account::EventParam_t* param)
 {
     if (param->event != Account::EVENT_PUB_PUBLISH)
     {
-        return Account::ERROR_UNSUPPORTED_REQUEST;
+        return Account::RES_UNSUPPORTED_REQUEST;
     }
 
     if (strcmp(param->tran->ID, "SportStatus") != 0
@@ -92,7 +93,7 @@ void LiveMapModel::TrackReload(TrackPointFilter::Callback_t callback, void* user
 
     int32_t pointX, pointY;
     while (pointContainer->PopPoint(&pointX, &pointY))
-    { 
+    {
         int32_t mapX, mapY;
         mapConv.ConvertMapLevelPos(
             &mapX, &mapY,

@@ -1,6 +1,6 @@
+#include <stdio.h>
 #include "DataProc.h"
 #include "Utils/GPX/GPX.h"
-#include <stdio.h>
 #include "Config/Config.h"
 #include "Version.h"
 
@@ -27,7 +27,7 @@ static lv_fs_res_t Recorder_FileWriteString(lv_fs_file_t* file_p, const char* st
     lv_fs_res_t res = lv_fs_write(
                           file_p,
                           str,
-                          strlen(str),
+                          (uint32_t)strlen(str),
                           nullptr
                       );
 
@@ -167,7 +167,7 @@ static int onNotify(Recorder_t* recorder, Recorder_Info_t* info)
 
 static int onEvent(Account* account, Account::EventParam_t* param)
 {
-    int retval = Account::ERROR_UNKNOW;
+    int retval = Account::RES_UNKNOW;
     Recorder_t* recorder = (Recorder_t*)account->UserData;;
 
     switch (param->event)
@@ -179,11 +179,11 @@ static int onEvent(Account* account, Account::EventParam_t* param)
             {
                 Recorder_RecPoint(recorder, (HAL::GPS_Info_t*)param->data_p);
             }
-            retval = Account::ERROR_NONE;
+            retval = Account::RES_OK;
         }
         else
         {
-            retval = Account::ERROR_SIZE_MISMATCH;
+            retval = Account::RES_SIZE_MISMATCH;
         }
         break;
 
@@ -194,7 +194,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
         }
         else
         {
-            retval = Account::ERROR_SIZE_MISMATCH;
+            retval = Account::RES_SIZE_MISMATCH;
         }
         break;
 
@@ -205,7 +205,7 @@ static int onEvent(Account* account, Account::EventParam_t* param)
         }
         else
         {
-            retval = Account::ERROR_SIZE_MISMATCH;
+            retval = Account::RES_SIZE_MISMATCH;
         }
         break;
 
@@ -219,6 +219,9 @@ static int onEvent(Account* account, Account::EventParam_t* param)
 DATA_PROC_INIT_DEF(Recorder)
 {
     static Recorder_t recorder;
+    memset(&recorder.recInfo, 0, sizeof(recorder.recInfo));
+    memset(&recorder.file, 0, sizeof(recorder.file));
+    recorder.active = false;
     recorder.account = account;
     account->UserData = &recorder;
 

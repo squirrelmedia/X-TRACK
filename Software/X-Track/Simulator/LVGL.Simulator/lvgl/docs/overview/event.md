@@ -101,13 +101,22 @@ The following event codes exist:
 - `LV_EVENT_DRAW_PART_BEGIN` Starting to draw a part. The event parameter is `lv_obj_draw_dsc_t *`. Learn more [here](/overview/drawing).
 - `LV_EVENT_DRAW_PART_END`   Finishing to draw a part. The event parameter is `lv_obj_draw_dsc_t *`. Learn more [here](/overview/drawing).
 
+In `LV_EVENT_DRAW_...` events it's not allowed to adjust the widgets' properties. E.g. you can not call `lv_obj_set_width()`.
+In other words only `get` functions can be called. 
+
 ### Other events
 - `LV_EVENT_DELETE`       Object is being deleted
 - `LV_EVENT_CHILD_CHANGED`    Child was removed/added
+- `LV_EVENT_CHILD_CREATED`    Child was created, always bubbles up to all parents
+- `LV_EVENT_CHILD_DELETED`    Child was deleted, always bubbles up to all parents
 - `LV_EVENT_SIZE_CHANGED`    Object coordinates/size have changed
 - `LV_EVENT_STYLE_CHANGED`    Object's style has changed
 - `LV_EVENT_BASE_DIR_CHANGED` The base dir has changed
 - `LV_EVENT_GET_SELF_SIZE`    Get the internal size of a widget
+- `LV_EVENT_SCREEN_UNLOAD_START` A screen unload started, fired immediately when lv_scr_load/lv_scr_load_anim is called
+- `LV_EVENT_SCREEN_LOAD_START` A screen load started, fired when the screen change delay is expired
+- `LV_EVENT_SCREEN_LOADED`    A screen was loaded, called when all animations are finished
+- `LV_EVENT_SCREEN_UNLOADED`  A screen was unloaded, called when all animations are finished
 
 ### Special events
 - `LV_EVENT_VALUE_CHANGED`    The object's value has changed (i.e. slider moved)
@@ -145,8 +154,8 @@ lv_event_send(mbox, LV_EVENT_VALUE_CHANGED, &btn_id);
 
 `lv_event_t` is the only parameter passed to the event callback and it contains all data about the event. The following values can be gotten from it:
 - `lv_event_get_code(e)` get the event code
-- `lv_event_get_target(e)` get the object to which an event was sent
-- `lv_event_get_original_target(e)` get the object to which an event was originally sent (different from `lv_event_get_target` if [event bubbling](#event-bubbling) is enabled)
+- `lv_event_get_current_target(e)` get the object to which an event was sent. I.e. the object whose event handler is being called.
+- `lv_event_get_target(e)` get the object that originally triggered the event (different from `lv_event_get_target` if [event bubbling](#event-bubbling) is enabled)
 - `lv_event_get_user_data(e)` get the pointer passed as the last parameter of `lv_obj_add_event_cb`.
 - `lv_event_get_param(e)` get the parameter passed as the last parameter of `lv_event_send` 
 

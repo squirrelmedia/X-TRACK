@@ -1,6 +1,6 @@
 ```eval_rst
 .. include:: /header.rst 
-:github_url: |github_link_base|/widgets/span.md
+:github_url: |github_link_base|/widgets/extra/span.md
 ```
 # Span (lv_span)
 
@@ -19,7 +19,7 @@ The spangroup object uses span to describe text and text style. so, first we nee
 
 If spangroup object `mode != LV_SPAN_MODE_FIXED` you must call `lv_spangroup_refr_mode()` after you have modified `span` style(eg:set text, changed the font size, del span).
 
-### Retreiving a span child
+### Retrieving a span child
 Spangroups store their children differently from normal objects, so normal functions for getting children won't work.
 
 `lv_spangroup_get_child(spangroup, id)` will return a pointer to the child span at index `id`. In addition, `id` can be negative to index from the end of the spangroup where `-1` is the youngest child, `-2` is second youngest, etc.
@@ -56,7 +56,7 @@ The spangroup can be set to one the following modes:
 Use `lv_spangroup_set_overflow(spangroup, LV_SPAN_OVERFLOW_CLIP)` to set object overflow mode.
 
 ### first line indent
-Use `lv_spangroup_set_indent(spangroup, 20)` to set the indent of the first line, in pixels.
+Use `lv_spangroup_set_indent(spangroup, 20)` to set the indent of the first line. all modes support pixel units, in addition to LV_SPAN_MODE_FIXED and LV_SPAN_MODE_BREAK mode supports percentage units too.
 
 ## Events
 No special events are sent by this widget. 

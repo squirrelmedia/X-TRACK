@@ -48,16 +48,16 @@ public:
     /* Error type enumeration */
     typedef enum
     {
-        ERROR_NONE                =  0,
-        ERROR_UNKNOW              = -1,
-        ERROR_SIZE_MISMATCH       = -2,
-        ERROR_UNSUPPORTED_REQUEST = -3,
-        ERROR_NO_CALLBACK         = -4,
-        ERROR_NO_CACHE            = -5,
-        ERROR_NO_COMMITED         = -6,
-        ERROR_NOT_FOUND           = -7,
-        ERROR_PARAM_ERROR         = -8
-    } ErrorCode_t;
+        RES_OK                  =  0,
+        RES_UNKNOW              = -1,
+        RES_SIZE_MISMATCH       = -2,
+        RES_UNSUPPORTED_REQUEST = -3,
+        RES_NO_CALLBACK         = -4,
+        RES_NO_CACHE            = -5,
+        RES_NO_COMMITED         = -6,
+        RES_NOT_FOUND           = -7,
+        RES_PARAM_ERROR         = -8
+    } ResCode_t;
 
     /* Event parameter structure */
     typedef struct
@@ -94,8 +94,8 @@ public:
     void SetEventCallback(EventCallback_t callback);
     void SetTimerPeriod(uint32_t period);
     void SetTimerEnable(bool en);
-    uint32_t GetPublishersSize();
-    uint32_t GetSubscribersSize();
+    size_t GetPublishersSize();
+    size_t GetSubscribersSize();
 
 public:
     const char* ID;      /* Unique account ID */

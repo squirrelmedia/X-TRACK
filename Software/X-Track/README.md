@@ -218,7 +218,7 @@
 * 14.lvgl内存池 64K -> 72K
 * 15.WString使用lvgl的内存池
 * 16.修复GPX轨迹文件<\ele>丢失问题(可能是内存碎片和heap过小导致WString realloc失败)
-	
+
 ## [v1.6] - 2021-8-7
 * 1.更新ArtDesign，新的导航箭头设计
 * 2.更新lv_drivers，去除坐标超界警告
@@ -323,3 +323,61 @@
 * 10.更新ArduinoJson
 * 11.Display_DumpCrashInfo report -> info
 * 12.更新HAL_Power，不使用ADC中断模式
+
+## [v2.0] - 2021-11-14
+* 1.Arduino API底层重构
+* 2.添加MillisTaskManager任务调度器
+* 3.lvgl使用标准memset和memcpy
+* 4.更新lvgl v8.1.0
+* 5.DataCenter错误码枚举 ERROR_XXX -> RES_XXX
+* 6.修改DP节点的结构体初始化方式，不使用默认初始化
+* 7.优化DP_SportStatus在临时信号丢时的数据统计处理
+* 8.修复StorageService文件结尾读取错误导致的crash
+* 9.添加lv_settings，暂未移植
+* 10.添加传感器自动扫描，防止未安装传感器导致的开机卡死
+* 11.使用event携带user_data
+* 12.优化new重载
+* 13.修复HAL_Power错误的关机处理
+* 14.添加SystemSave.json自动备份功能
+
+## [v2.1] - 2021-12-16
+* 1.ArduinoAPI更新
+* 2.将LVGL部分绘图函数放到RAM执行，提升运行效率，不删除.sct文件
+* 3.Adafruit_ST778驱动更新，适配新的SPI库
+* 4.更新lvgl v8.1.1 dev
+* 5.lv_conf.h更新，使用新的缩进
+* 6.lv_monkey合入LVGL主线
+* 7.去除LiveMap进入时的透明度渐变动画，提升流畅度
+* 8.更新HAL_Power，充电检测上下拉可选
+* 9.优化IMU和MAG初始化
+
+## [v2.2] - 2021-12-30
+* 1.添加系统软件架构说明
+* 2.去除弃用的_LIS3MDL
+* 3.修复使用strncpy()遗漏的'\0'结束符
+* 4.添加AT32F435移植
+* 5.LV_DISP_DEF_REFR_PERIOD 20ms -> 16ms
+* 6.LV_MEM_SIZE 78KB -> 70KB
+* 7.默认开启PNG解码器，受限于内存MCU无法使用
+* 8.添加轨迹记录状态指示渐变动画
+* 9.添加文本动画组件lv_anim_label，替换旧的lv_label_anim_effect
+* 10.去除lv_settings
+
+## [v2.3] - 2022-1-30
+* 1.Arduino API 更新
+* 2.添加wdg看门狗，系统卡死时自动重启
+* 3.lvgl主程序更新
+* 4.添加低内存开销(<50KB)的PNGdec解码器（暂不启用）
+* 5.更新LiveMap，适配新的PNGdec
+* 6.更新StatusBar，调整字体，新的轨迹记录状态指示渐变动画
+* 7.ResourceManager从PageManager分离
+* 8.lv_anim_label组件从lv_ext分离
+* 9.添加lv_img_png组件
+
+## [v2.4] - 2022-2-27
+* 1.添加指定的Pack
+* 2.AT32F435 Pack更新 2.0.0 -> 2.0.6
+* 3.__wfi() -> __WFI()
+* 4.移除lv_demo_conf.h
+* 5.更新lvgl v8.3.0 dev
+* 6.AT32F403A Stack size 0x2000 -> 0x1000

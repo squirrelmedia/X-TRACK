@@ -5,16 +5,17 @@
 
 # Arduino
 
-The [core LVGL library](https://github.com/lvgl/lvgl) and the [demos](https://github.com/lvgl/lv_demos) are directly available as Arduino libraries.
+The [LVGL library](https://github.com/lvgl/lvgl) is directly available as Arduino libraries.
 
-Note that you need to choose a powerful enough board to run LVGL and your GUI.  See the [requirements of LVGL](https://docs.lvgl.io/latest/en/html/intro/index.html#requirements). 
+Note that you need to choose a board powerful enough to run LVGL and your GUI.  See the [requirements of LVGL](https://docs.lvgl.io/master/intro/index.html#requirements). 
 
-For example ESP32 is a good candidate to create your UI with LVGL.
-
+For example ESP32 is a good candidate to create UI's with LVGL.
 
 ## Get the LVGL Arduino library
 
 LVGL can be installed via the Arduino IDE Library Manager or as a .ZIP library.
+
+You can [Download](https://github.com/lvgl/lvgl/archive/refs/heads/master.zip) the latest version of LVGL from GitHub and simply copy it to Arduino's library folder. 
 
 ## Set up drivers
 
@@ -28,21 +29,35 @@ Both files are located in `TFT_eSPI` library's folder.
 ## Configure LVGL
 
 LVGL has its own configuration file called `lv_conf.h`. When LVGL is installed, follow these configuration steps:
-1. Go to directory of the installed Arduino libraries
+1. Go to the directory of the installed Arduino libraries
 2. Go to `lvgl` and copy `lv_conf_template.h` as `lv_conf.h` into the Arduino Libraries directory next to the `lvgl` library folder.
-3. Open `lv_conf.h` and change the first `#if 0` to `#if 1`
+3. Open `lv_conf.h` and change the first `#if 0` to `#if 1` to enable the content of the file
 4. Set the color depth of you display in `LV_COLOR_DEPTH`
 5. Set `LV_TICK_CUSTOM 1`
 
-## Initialize LVGL and run an example
+Finally the layout with `lv_conf.h` should look like this:
+```
+arduino
+ |-libraries
+   |-lvgl
+   |-other_lib_1
+   |-other_lib_2
+   |-lv_conf.h
+```
+
+## Initialize and run LVGL
 
 Take a look at [LVGL_Arduino.ino](https://github.com/lvgl/lvgl/blob/master/examples/arduino/LVGL_Arduino/LVGL_Arduino.ino) to see how to initialize LVGL.
-TFT_eSPI is used as the display driver.
+`TFT_eSPI` is used as the display driver.
 
 In the INO file you can see how to register a display and a touchpad for LVGL and call an example.
 
-Note that, there is no dedicated INO file for every example, but you can call functions like `lv_example_btn_1()` or `lv_example_slider_1()` to run an example.
-Most of the examples are available in the [`lvgl/examples`](https://github.com/lvgl/lvgl/tree/master/examples) folder. Some are also available in [`lv_demos`](https://github.com/lvgl/lv_demos), which needs to be installed and configured separately.
+## Use the examples and demos
+
+Note that, there is no dedicated INO file for every example. Instead, you can load an example by calling an `lv_example_...` function. For example `lv_example_btn_1()`.
+
+**IMPORTANT**
+Due to some the limitations of Arduino's build system you need to copy `lvgl/examples` to `lvgl/src/examples`. Similarly for the demos `lvgl/demos` to `lvgl/src/demos`.
 
 ## Debugging and logging
 

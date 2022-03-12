@@ -9,7 +9,7 @@
 #include "Utils/GPX_Parser/GPX_Parser.h"
 #include "Config/Config.h"
 
-#define CONFIG_TRACK_VIRTUAL_GPX_FILE_PATH    "/TRACK_2021-05-15_15-00-09.gpx"
+#define CONFIG_TRACK_VIRTUAL_GPX_FILE_PATH    "/TRK_EXAMPLE.gpx"
 
 #define PI 3.1415926535897932384626433832795f
 #define HALF_PI 1.5707963267948966192313216916398f
@@ -125,15 +125,13 @@ bool HAL::GPS_GetInfo(GPS_Info_t* info)
 
 void HAL::GPS_Init()
 {
-    gpsInfo.isVaild = true;
-    gpsInfo.satellites = 10;
     gpsInfo.longitude = CONFIG_GPS_LONGITUDE_DEFAULT;
     gpsInfo.latitude = CONFIG_GPS_LATITUDE_DEFAULT;
+    gpsInfo.isVaild = Parser_Init(&gpxParser, &fileInfo);
 
-    bool success = Parser_Init(&gpxParser, &fileInfo);
-
-    if (success)
+    if (gpsInfo.isVaild)
     {
+        gpsInfo.satellites = 10;
         lv_timer_create(
             [](lv_timer_t* timer) {
                 GPS_Update();
